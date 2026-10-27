@@ -1,0 +1,12 @@
+metric,value
+raw_rows,30000
+missing_values,0
+exact_duplicates_removed,35
+education_remapped,345
+marriage_remapped,54
+clean_rows,29965
+identical_feature_groups,21
+conflicting_label_groups,21
+random_state,42
+split_method,StratifiedGroupKFold: 14/3/3 of 20 folds
+raw_sha256,52782b83e312db0d3dac5d6eaee5f645233afa76255520bbe3f20a8c6c88c220

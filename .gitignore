@@ -3,3 +3,6 @@ data/raw/*.zip
 __pycache__/
 .ipynb_checkpoints/
 outputs/
+.venv/
+data/processed/
+.DS_Store
