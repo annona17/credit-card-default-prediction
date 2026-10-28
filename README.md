@@ -27,7 +27,8 @@ và chạy từng ô từ trên xuống. Có thể tải notebook lên Kaggle v�
 qua Add Input. Notebook tự chứa code, không cần import các file trong `src/`.
 
 Trình tự: đọc dữ liệu → EDA → làm sạch → chia train/validation/test → tạo đặc
-trưng → mã hóa/chuẩn hóa → kiểm tra đầu vào mô hình. Các bảng và biểu đồ hiển
+trưng → mã hóa/chuẩn hóa → kiểm tra đầu vào mô hình → xây dựng tập đánh giá
+(Phần 3). Các bảng và biểu đồ hiển
 thị trực tiếp; dữ liệu chỉ được xử lý trong bộ nhớ, không tự ghi file. Notebook
 được cung cấp với các ô chưa chạy. Hai script `.py` vẫn dùng độc lập như cũ.
 
@@ -87,3 +88,34 @@ scores = cross_validate(model, train[FEATURES], train['default'], groups=groups,
 
 Báo cáo phương pháp: `reports/Bao_cao_Tien_xu_ly.md`.
 Bảng kết quả: `reports/tables/09_preprocessing_*.csv`.
+
+## Tập đánh giá
+
+Phép chia chuẩn được lưu cố định trong `data/splits/split_manifest.csv` (có trong
+Git) để mọi thành viên đánh giá trên cùng một tập test, kể cả khi phiên bản thư
+viện khác nhau (train 20.976 / validation 4.493 / test 4.496 mẫu).
+
+```bash
+.venv/bin/python -m src.evaluation
+.venv/bin/python -m unittest tests.test_evaluation -v
+```
+
+Script đọc manifest, kiểm tra số mẫu và ghi các bảng phân bố `reports/tables/10_*.csv`.
+Phần 3 không chạy mô hình nào.
+
+Trong notebook, Phần 3 (mục 19–25) dùng manifest nếu tìm thấy, nếu không thì dùng
+phép chia của mục 13. Đánh giá một mô hình bằng:
+
+```python
+evaluate_model("Tên mô hình", Pipeline([("pre", make_preprocessor("tree", with_features=True)),
+                                        ("clf", classifier)]))
+display(results_table("validation"))   # chọn cấu hình, chưa xem test
+boot = test_report()                   # đánh giá cuối, một lần
+display(paired_diff(boot, "A", "B"))   # so sánh bằng paired bootstrap
+```
+
+Chỉ số chính: PR-AUC (AP) cho khả năng phân biệt, expected cost $(5 \cdot FN + FP)/n$
+cho hiệu quả quyết định; ngưỡng chọn trên validation theo expected cost nhỏ nhất.
+Chỉ kết luận một mô hình tốt hơn khi KTC 95% của hiệu số không chứa 0.
+
+Báo cáo phương pháp: `reports/Bao_cao_Tap_danh_gia.md`.
