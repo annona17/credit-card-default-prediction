@@ -119,3 +119,35 @@ cho hiệu quả quyết định; ngưỡng chọn trên validation theo expecte
 Chỉ kết luận một mô hình tốt hơn khi KTC 95% của hiệu số không chứa 0.
 
 Báo cáo phương pháp: `reports/Bao_cao_Tap_danh_gia.md`.
+
+## Phần của Hiệp: mô hình cơ sở và thay thế
+
+Dùng tiếp tiền xử lý Phần 2 và manifest cố định của Phần 3:
+
+```bash
+python -m pip install -r requirements.txt
+python -m src.modeling
+# Kiểm tra cũ cần các preprocessor.joblib tự sinh trong data/processed/:
+python -m src.preprocessing
+python -m unittest discover -s tests -v
+```
+
+Trên Windows có thể dùng `.venv\Scripts\python` thay cho `python`.
+Logistic Regression là phương án cơ sở (`linear_base`); HistGradientBoosting là
+phương án thay thế (`tree_extended`). Chọn siêu tham số bằng CV 5 fold theo nhóm
+trên train; chọn mô hình theo CV và quy tắc ưu tiên mô hình đơn giản của Phần 3;
+validation chỉ chọn ngưỡng theo chi phí 5FN+FP. Sau khi chốt mới đánh giá test.
+
+- Hướng dẫn chạy tương tác: `notebooks/mo_hinh_Hiep.ipynb` (cần clone repo).
+- Báo cáo hai phần: `reports/Bao_cao_Mo_hinh_Hiep.md`.
+- Bảng CV, validation, test, KTC bootstrap và phân tích lỗi: `reports/tables/11_*.csv`.
+- Biểu đồ: `reports/figures/11_pr_roc.png`, `11_confusion.png`.
+- Pipeline và ngưỡng để tích hợp demo: `outputs/hiep/*.joblib` (tự sinh, gitignore).
+- Phiên bản môi trường thực nghiệm: `requirements-modeling-lock.txt`.
+
+`outputs/hiep/selection.json` ghi lựa chọn trước khi xem test, hash dữ liệu/manifest
+và phiên bản thư viện. `test_predictions.csv` lưu xác suất theo ID để tích hợp
+với các mô hình khác của nhóm. Chạy lại sẽ ghi đè đầu ra phần mô hình của Hiệp.
+Không thay cấu hình dựa trên test rồi coi test đó là một đánh giá độc lập mới.
+Lệnh preprocessing phục vụ kiểm tra cũ có thể sinh phép chia khác theo phiên bản
+thư viện; phần modeling luôn đọc `data/splits/split_manifest.csv` cố định.
