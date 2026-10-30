@@ -151,3 +151,38 @@ với các mô hình khác của nhóm. Chạy lại sẽ ghi đè đầu ra ph�
 Không thay cấu hình dựa trên test rồi coi test đó là một đánh giá độc lập mới.
 Lệnh preprocessing phục vụ kiểm tra cũ có thể sinh phép chia khác theo phiên bản
 thư viện; phần modeling luôn đọc `data/splits/split_manifest.csv` cố định.
+
+## Ba phương án thay thế bổ sung và bảng so sánh chung
+
+```bash
+python -m src.modeling_team
+```
+
+Lệnh này bổ sung **Random Forest, SVM RBF, Gaussian Naive Bayes**, chạy cùng LR,
+HGB và no-skill trên manifest cố định. Lưới LR/HGB giữ nguyên. Mỗi pipeline chọn
+cấu hình bằng CV train theo nhóm, validation chỉ chọn ngưỡng chi phí, rồi mới
+tính test. Đầu ra phần Hiệp `11_*` được giữ riêng; kết quả chung ở `12_*`.
+
+- Notebook: `notebooks/ba_phuong_an_bo_sung.ipynb` (mở trong bản clone repo).
+- Báo cáo chung: `reports/Bao_cao_So_sanh_Tat_ca_Mo_hinh.md`.
+- Ba phần riêng: `reports/Bao_cao_Random_Forest.md`, `reports/Bao_cao_SVM_RBF.md`,
+  `reports/Bao_cao_Gaussian_Naive_Bayes.md`.
+- Bảng kết quả: `reports/tables/12_*.csv`; biểu đồ: `reports/figures/12_*.png`.
+- Lưới, lựa chọn CV, hash và phiên bản: `reports/team_modeling_metadata.json`.
+- Pipeline và ngưỡng: `outputs/team/*.joblib`; điểm theo ID: `test_scores.csv`
+  trong cùng thư mục (tự sinh, gitignore).
+
+SVM dùng `decision_function`, **không phải xác suất**. Khi tích hợp demo:
+
+```python
+import joblib
+from src.modeling_team import model_scores
+bundle = joblib.load('outputs/team/svm_rbf.joblib')
+# X gồm FEATURES đã làm sạch, chưa chuẩn hóa; pipeline tự biến đổi.
+score = model_scores(bundle['model'], X)
+warning = score >= bundle['threshold']
+```
+
+Không dùng `.predict()` mặc định thay cho ngưỡng validation. Thực nghiệm bổ sung
+diễn ra sau khi đã xem test LR/HGB, nên báo cáo chung ghi rõ đây là đánh giá khám
+phá trên cùng test, chưa phải xác nhận độc lập. Không chỉnh cấu hình theo test.
