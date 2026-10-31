@@ -1,188 +1,92 @@
-# Dự đoán vỡ nợ thẻ tín dụng (Default of Credit Card Clients)
+# Dự đoán khả năng vỡ nợ của khách hàng sử dụng thẻ tín dụng
 
-Bài tập nhóm cuối kỳ môn Nhận dạng mẫu.
+Bài tập nhóm cuối kỳ học phần **Nhận dạng mẫu** – Nhóm 13. Giảng viên: TS. Nguyễn Xuân Đức.
 
-## Dữ liệu
-- Nguồn: UCI Machine Learning Repository, mã 350, https://archive.ics.uci.edu/dataset/350 (DOI 10.24432/C55S3H, giấy phép CC BY 4.0).
-- Tải file zip từ https://archive.ics.uci.edu/static/public/350/default+of+credit+card+clients.zip, giải nén vào `data/raw/`.
+- **Báo cáo:** [PDF](reports/Bao_cao_Final.pdf) · [Word](reports/Bao_cao_Final.docx) · [Markdown](reports/Bao_cao_Final.md)
+- **Bài toán:** phân loại hai lớp (vỡ nợ / không vỡ nợ trong tháng kế tiếp) trên dữ liệu mất cân bằng (22% vỡ nợ), chi phí lỗi bất đối xứng (bỏ sót một khách hàng vỡ nợ = 5 lần cảnh báo nhầm).
+- **Mô hình:** Logistic Regression (cơ sở); HistGradientBoosting, Random Forest, SVM RBF, Gaussian Naive Bayes (thay thế).
+- **Kết quả chính (tập test):** HistGradientBoosting đạt PR-AUC 0,569 (KTC 95% [0,533; 0,601]), ROC-AUC 0,787, expected cost 0,541 – tốt hơn có ý nghĩa thống kê so với Logistic Regression (PR-AUC 0,507; expected cost 0,617).
 
-## Cài đặt
-```bash
-pip install pandas numpy matplotlib seaborn scipy scikit-learn xlrd
-```
+| Thành viên | Mã học viên |
+|---|---|
+| Lưu Ngọc Anh | B26CHKH006 |
+| Nguyễn Hoàng Hiệp | B26CHKH042 |
+| Nguyễn Anh Quân | B26CHKH080 |
+| Hoàng Anh Vũ | B26CHKH103 |
 
-## Chạy phân tích sơ bộ
-```bash
-python src/eda.py
-```
-Kết quả: biểu đồ ở `reports/figures/`, bảng số liệu ở `reports/tables/`. Bản notebook để chạy trên Kaggle: `kaggle/du_doan_kha_nang_vo_no_the_tin_dung.ipynb` (tự tìm dữ liệu trong `/kaggle/input`).
+## Chạy nhanh
 
-Báo cáo phần bài toán và dữ liệu: `reports/Bao_cao_Phan1_Bai_toan_va_Du_lieu.docx`.
+Các lệnh chạy từ thư mục gốc của dự án. Trên Windows thay `.venv/bin/python` bằng `.venv\Scripts\python` và bật chế độ UTF-8 trước khi chạy để in được tiếng Việt ra console: `$env:PYTHONUTF8=1` (PowerShell) hoặc `set PYTHONUTF8=1` (cmd).
 
-## Notebook theo toàn bộ quá trình
-
-Mở [`notebooks/eda_va_tien_xu_ly.ipynb`](notebooks/eda_va_tien_xu_ly.ipynb)
-trong VS Code/Jupyter, chọn kernel Python có các thư viện trong requirements.txt
-và chạy từng ô từ trên xuống. Có thể tải notebook lên Kaggle và thêm dữ liệu
-qua Add Input. Notebook tự chứa code, không cần import các file trong `src/`.
-
-Trình tự: đọc dữ liệu → EDA → làm sạch → chia train/validation/test → tạo đặc
-trưng → mã hóa/chuẩn hóa → kiểm tra đầu vào mô hình → xây dựng tập đánh giá
-(Phần 3). Các bảng và biểu đồ hiển
-thị trực tiếp; dữ liệu chỉ được xử lý trong bộ nhớ, không tự ghi file. Notebook
-được cung cấp với các ô chưa chạy. Hai script `.py` vẫn dùng độc lập như cũ.
-
-## Tiền xử lý dữ liệu
-
-Chạy từ thư mục gốc (Python 3.9 trở lên):
+### 1. Cài đặt (Python 3.9 trở lên)
 
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m src.preprocessing
-.venv/bin/python -m unittest discover -s tests -v
 ```
 
-Để tái lập đúng môi trường đã kiểm tra (Python 3.9), cài bằng
-`.venv/bin/python -m pip install -r requirements-lock.txt` thay cho requirements.txt.
+### 2. Dữ liệu
 
-Quy trình giữ nguyên dữ liệu gốc, loại dòng trùng, gộp mã nhân khẩu học và chia
-train/validation/test xấp xỉ 70/15/15 với seed 42. Các hồ sơ giống nhau sau làm
-sạch luôn nằm cùng một tập, kể cả khi khác nhãn. Tỷ lệ thực tế có thể lệch nhẹ
-vì ràng buộc nhóm. Các phép chuẩn hóa chỉ học trên train.
+Tệp dữ liệu gốc đã có sẵn trong repo: `data/raw/default of credit card clients.xls`. Nếu thiếu, tải từ UCI rồi giải nén vào `data/raw/`:
 
-Đầu ra trong `data/processed/` (tự sinh, không đưa vào Git):
+- Trang dữ liệu: https://archive.ics.uci.edu/dataset/350 (DOI 10.24432/C55S3H, giấy phép CC BY 4.0)
+- Tệp zip: https://archive.ics.uci.edu/static/public/350/default+of+credit+card+clients.zip
 
-- `train.csv`, `validation.csv`, `test.csv`: dữ liệu đã làm sạch, chưa chuẩn hóa.
-- `split_manifest.csv`: ID, nhóm hồ sơ, fold và tập tương ứng.
-- `removed_duplicate_ids.csv`: ID các bản ghi trùng đã loại.
-- `metadata.json`: số liệu kiểm tra, seed, phiên bản thư viện, SHA-256 nguồn.
-- `linear_base/`, `linear_extended/`, `tree_base/`, `tree_extended/`: mỗi thư mục
-  có ba CSV đã biến đổi và `preprocessor.joblib` đã fit trên train.
+### 3. Chạy theo thứ tự
 
-Các CSV vẫn chứa `ID` để đối chiếu và `default` làm nhãn; **phải loại hai cột này
-khỏi X khi huấn luyện**. Bản extended bổ sung sáu đặc trưng hành vi.
-Các bộ tiền xử lý đã lưu cần được nạp từ thư mục gốc dự án để import được `src`.
+| Bước | Lệnh | Đầu ra | Chương |
+|---|---|---|---|
+| 1. Phân tích sơ bộ | `.venv/bin/python src/eda.py` | `reports/figures/00–10_*.png`, `reports/tables/00–08_*.csv` | 2 |
+| 2. Tiền xử lý | `.venv/bin/python -m src.preprocessing` | `data/processed/` (dữ liệu sạch, 4 cấu hình đầu vào, bộ tiền xử lý đã fit) | 3 |
+| 3. Tập đánh giá | `.venv/bin/python -m src.evaluation` | `reports/tables/10_*.csv` | 4 |
+| 4. Huấn luyện và đánh giá 5 mô hình | `.venv/bin/python -m src.modeling_team` | `reports/tables/12_*.csv`, `reports/figures/12_*.png`, `outputs/team/*.joblib` | 5–6 |
+| 5. Kiểm thử | `.venv/bin/python -m unittest discover -s tests -v` | – | – |
 
-Khi cross-validation, dùng dữ liệu chưa chuẩn hóa và tạo pipeline mới; không
-đưa CSV đã chuẩn hóa trên toàn train vào cross-validation. Ví dụ:
+- Bước 4 mất khoảng 7 phút (SVM chiếm phần lớn thời gian). Bước 5 cần chạy sau bước 2.
+- Bước 3 và 4 luôn đọc phép chia cố định trong `data/splits/split_manifest.csv` (train 20.976 / validation 4.493 / test 4.496), nên mọi thành viên đánh giá trên cùng một tập test dù phiên bản thư viện khác nhau.
+- Bước 2 tự tạo lại phép chia; với scikit-learn khác 1.6.1, phép chia này lệch nhẹ so với manifest (ví dụ train 20.977 mẫu) và ghi đè `reports/tables/09_preprocessing_splits.csv`. Điều này không ảnh hưởng kết quả mô hình, nhưng không nên commit bảng 09 vừa sinh ra – khôi phục bằng `git checkout -- reports/tables/09_preprocessing_splits.csv`, hoặc dùng môi trường khóa ở mục 4.
+- `data/processed/` và `outputs/` là đầu ra tự sinh, không đưa vào Git.
 
-```python
-import pandas as pd
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import StratifiedGroupKFold, cross_validate
-from src.preprocessing import FEATURES, make_preprocessor
+### 4. Tái lập đúng số liệu trong báo cáo
 
-train = pd.read_csv('data/processed/train.csv')
-manifest = pd.read_csv('data/processed/split_manifest.csv').set_index('ID')
-groups = train.ID.map(manifest.group_id)
-model = Pipeline([
-    ('preprocessing', make_preprocessor('linear', with_features=True)),
-    ('classifier', LogisticRegression(max_iter=2000)),
-])
-cv = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
-scores = cross_validate(model, train[FEATURES], train['default'], groups=groups,
-                        cv=cv, scoring=['roc_auc', 'average_precision'])
-```
+`requirements.txt` cho phép một khoảng phiên bản. Để ra đúng từng con số trong báo cáo, dùng môi trường đã khóa phiên bản:
 
-Báo cáo phương pháp: `reports/Bao_cao_Tien_xu_ly.md`.
-Bảng kết quả: `reports/tables/09_preprocessing_*.csv`.
-
-## Tập đánh giá
-
-Phép chia chuẩn được lưu cố định trong `data/splits/split_manifest.csv` (có trong
-Git) để mọi thành viên đánh giá trên cùng một tập test, kể cả khi phiên bản thư
-viện khác nhau (train 20.976 / validation 4.493 / test 4.496 mẫu).
+- `requirements-lock.txt` (Python 3.9, scikit-learn 1.6.1) cho bước 1–3. Chỉ môi trường này tạo lại đúng `split_manifest.csv` nếu chạy lại phép chia từ đầu.
+- `requirements-modeling-lock.txt` (Python 3.11, scikit-learn 1.9.1) cho bước 4.
 
 ```bash
-.venv/bin/python -m src.evaluation
-.venv/bin/python -m unittest tests.test_evaluation -v
+python -m venv .venv-model
+.venv-model/bin/python -m pip install -r requirements-modeling-lock.txt
+.venv-model/bin/python -m src.modeling_team
 ```
 
-Script đọc manifest, kiểm tra số mẫu và ghi các bảng phân bố `reports/tables/10_*.csv`.
-Phần 3 không chạy mô hình nào.
+## Dùng mô hình đã huấn luyện
 
-Trong notebook, Phần 3 (mục 19–25) dùng manifest nếu tìm thấy, nếu không thì dùng
-phép chia của mục 13. Đánh giá một mô hình bằng:
-
-```python
-evaluate_model("Tên mô hình", Pipeline([("pre", make_preprocessor("tree", with_features=True)),
-                                        ("clf", classifier)]))
-display(results_table("validation"))   # chọn cấu hình, chưa xem test
-boot = test_report()                   # đánh giá cuối, một lần
-display(paired_diff(boot, "A", "B"))   # so sánh bằng paired bootstrap
-```
-
-Chỉ số chính: PR-AUC (AP) cho khả năng phân biệt, expected cost $(5 \cdot FN + FP)/n$
-cho hiệu quả quyết định; ngưỡng chọn trên validation theo expected cost nhỏ nhất.
-Chỉ kết luận một mô hình tốt hơn khi KTC 95% của hiệu số không chứa 0.
-
-Báo cáo phương pháp: `reports/Bao_cao_Tap_danh_gia.md`.
-
-## Phần của Hiệp: mô hình cơ sở và thay thế
-
-Dùng tiếp tiền xử lý Phần 2 và manifest cố định của Phần 3:
-
-```bash
-python -m pip install -r requirements.txt
-python -m src.modeling
-# Kiểm tra cũ cần các preprocessor.joblib tự sinh trong data/processed/:
-python -m src.preprocessing
-python -m unittest discover -s tests -v
-```
-
-Trên Windows có thể dùng `.venv\Scripts\python` thay cho `python`.
-Logistic Regression là phương án cơ sở (`linear_base`); HistGradientBoosting là
-phương án thay thế (`tree_extended`). Chọn siêu tham số bằng CV 5 fold theo nhóm
-trên train; chọn mô hình theo CV và quy tắc ưu tiên mô hình đơn giản của Phần 3;
-validation chỉ chọn ngưỡng theo chi phí 5FN+FP. Sau khi chốt mới đánh giá test.
-
-- Hướng dẫn chạy tương tác: `notebooks/mo_hinh_Hiep.ipynb` (cần clone repo).
-- Báo cáo hai phần: `reports/Bao_cao_Mo_hinh_Hiep.md`.
-- Bảng CV, validation, test, KTC bootstrap và phân tích lỗi: `reports/tables/11_*.csv`.
-- Biểu đồ: `reports/figures/11_pr_roc.png`, `11_confusion.png`.
-- Pipeline và ngưỡng để tích hợp demo: `outputs/hiep/*.joblib` (tự sinh, gitignore).
-- Phiên bản môi trường thực nghiệm: `requirements-modeling-lock.txt`.
-
-`outputs/hiep/selection.json` ghi lựa chọn trước khi xem test, hash dữ liệu/manifest
-và phiên bản thư viện. `test_predictions.csv` lưu xác suất theo ID để tích hợp
-với các mô hình khác của nhóm. Chạy lại sẽ ghi đè đầu ra phần mô hình của Hiệp.
-Không thay cấu hình dựa trên test rồi coi test đó là một đánh giá độc lập mới.
-Lệnh preprocessing phục vụ kiểm tra cũ có thể sinh phép chia khác theo phiên bản
-thư viện; phần modeling luôn đọc `data/splits/split_manifest.csv` cố định.
-
-## Ba phương án thay thế bổ sung và bảng so sánh chung
-
-```bash
-python -m src.modeling_team
-```
-
-Lệnh này bổ sung **Random Forest, SVM RBF, Gaussian Naive Bayes**, chạy cùng LR,
-HGB và no-skill trên manifest cố định. Lưới LR/HGB giữ nguyên. Mỗi pipeline chọn
-cấu hình bằng CV train theo nhóm, validation chỉ chọn ngưỡng chi phí, rồi mới
-tính test. Đầu ra phần Hiệp `11_*` được giữ riêng; kết quả chung ở `12_*`.
-
-- Notebook: `notebooks/ba_phuong_an_bo_sung.ipynb` (mở trong bản clone repo).
-- Báo cáo chung: `reports/Bao_cao_So_sanh_Tat_ca_Mo_hinh.md`.
-- Ba phần riêng: `reports/Bao_cao_Random_Forest.md`, `reports/Bao_cao_SVM_RBF.md`,
-  `reports/Bao_cao_Gaussian_Naive_Bayes.md`.
-- Bảng kết quả: `reports/tables/12_*.csv`; biểu đồ: `reports/figures/12_*.png`.
-- Lưới, lựa chọn CV, hash và phiên bản: `reports/team_modeling_metadata.json`.
-- Pipeline và ngưỡng: `outputs/team/*.joblib`; điểm theo ID: `test_scores.csv`
-  trong cùng thư mục (tự sinh, gitignore).
-
-SVM dùng `decision_function`, **không phải xác suất**. Khi tích hợp demo:
+Sau bước 4, mỗi mô hình được lưu cùng ngưỡng quyết định đã chọn trên validation. Đầu vào là 23 cột gốc đã làm sạch; pipeline tự tạo đặc trưng và biến đổi.
 
 ```python
 import joblib
 from src.modeling_team import model_scores
-bundle = joblib.load('outputs/team/svm_rbf.joblib')
-# X gồm FEATURES đã làm sạch, chưa chuẩn hóa; pipeline tự biến đổi.
-score = model_scores(bundle['model'], X)
-warning = score >= bundle['threshold']
+from src.preprocessing import FEATURES
+
+bundle = joblib.load('outputs/team/hist_gradient_boosting.joblib')
+score = model_scores(bundle['model'], X[FEATURES])   # X: DataFrame các khách hàng cần dự đoán
+canh_bao = score >= bundle['threshold']               # ngưỡng tối thiểu hóa 5·FN + FP
 ```
 
-Không dùng `.predict()` mặc định thay cho ngưỡng validation. Thực nghiệm bổ sung
-diễn ra sau khi đã xem test LR/HGB, nên báo cáo chung ghi rõ đây là đánh giá khám
-phá trên cùng test, chưa phải xác nhận độc lập. Không chỉnh cấu hình theo test.
+Không dùng `.predict()` mặc định (ngưỡng 0,5). Riêng SVM trả về giá trị hàm quyết định, không phải xác suất.
+
+## Cấu trúc thư mục
+
+```
+data/raw/          dữ liệu gốc UCI
+data/splits/       phép chia cố định train/validation/test
+src/               mã nguồn: eda, preprocessing, evaluation, modeling, modeling_team
+tests/             kiểm thử tự động
+notebooks/         notebook chạy từng bước (EDA → tiền xử lý → tập đánh giá → mô hình)
+reports/           báo cáo, bảng số liệu (tables/) và biểu đồ (figures/)
+```
+
+Notebook: [`eda_va_tien_xu_ly.ipynb`](notebooks/eda_va_tien_xu_ly.ipynb) (EDA, tiền xử lý, tập đánh giá; tự chứa code, chạy được trên Kaggle), [`mo_hinh_Hiep.ipynb`](notebooks/mo_hinh_Hiep.ipynb) và [`ba_phuong_an_bo_sung.ipynb`](notebooks/ba_phuong_an_bo_sung.ipynb) (mô hình; cần clone repo). Bản dùng trên Kaggle: `kaggle/du_doan_kha_nang_vo_no_the_tin_dung.ipynb`.
+
+Báo cáo thành phần của từng phần việc (đã được tổng hợp vào báo cáo cuối kỳ) nằm trong `reports/`: `Bao_cao_Phan1_Bai_toan_va_Du_lieu.docx`, `Bao_cao_Tien_xu_ly.md`, `Bao_cao_Tap_danh_gia.md`, `Bao_cao_Mo_hinh_Hiep.md`, `Bao_cao_So_sanh_Tat_ca_Mo_hinh.md` và ba báo cáo mô hình bổ sung.
