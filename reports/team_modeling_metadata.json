@@ -1,0 +1,75 @@
+{
+  "stage": "expanded exploratory experiment after prior LR/HGB test results",
+  "grid": {
+    "Logistic Regression": {
+      "clf__C": [
+        0.1,
+        1.0,
+        10.0
+      ]
+    },
+    "HistGradientBoosting": {
+      "clf__max_leaf_nodes": [
+        7,
+        15
+      ],
+      "clf__l2_regularization": [
+        0.0,
+        10.0
+      ]
+    },
+    "Random Forest": {
+      "clf__max_depth": [
+        8,
+        null
+      ],
+      "clf__min_samples_leaf": [
+        5,
+        20
+      ]
+    },
+    "SVM RBF": {
+      "clf__C": [
+        0.1,
+        1.0,
+        10.0
+      ]
+    },
+    "Gaussian Naive Bayes": {
+      "clf__var_smoothing": [
+        1e-09,
+        1e-07,
+        1e-05
+      ]
+    }
+  },
+  "seed": 42,
+  "raw_sha256": "52782b83e312db0d3dac5d6eaee5f645233afa76255520bbe3f20a8c6c88c220",
+  "manifest_sha256": "e2f3685340c75645b0c3241588c4fed6a6eb7471aa714ff5fd21e1569cc8ea3a",
+  "versions": {
+    "python": "3.11.4",
+    "sklearn": "1.9.1",
+    "pandas": "2.3.3",
+    "numpy": "2.4.6"
+  },
+  "selected_by_train_cv": "HistGradientBoosting",
+  "predeclared_comparisons": [
+    [
+      "HistGradientBoosting",
+      "No-skill"
+    ],
+    [
+      "HistGradientBoosting",
+      "Logistic Regression"
+    ]
+  ],
+  "selection_rule": "LR if gap to best AP < best AP fold SD; otherwise best AP",
+  "score_kinds": {
+    "Logistic Regression": "predict_proba",
+    "HistGradientBoosting": "predict_proba",
+    "Random Forest": "predict_proba",
+    "SVM RBF": "decision_function",
+    "Gaussian Naive Bayes": "predict_proba",
+    "No-skill": "predict_proba"
+  }
+}

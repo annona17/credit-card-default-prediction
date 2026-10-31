@@ -1,0 +1,23 @@
+{
+  "selected_by_train_cv": "HistGradientBoosting",
+  "seed": 42,
+  "selection_rule": "LR if gap to best CV AP < best CV AP SD; otherwise best CV AP",
+  "predeclared_comparisons": [
+    [
+      "HistGradientBoosting",
+      "No-skill"
+    ],
+    [
+      "HistGradientBoosting",
+      "Logistic Regression"
+    ]
+  ],
+  "raw_sha256": "52782b83e312db0d3dac5d6eaee5f645233afa76255520bbe3f20a8c6c88c220",
+  "manifest_sha256": "e2f3685340c75645b0c3241588c4fed6a6eb7471aa714ff5fd21e1569cc8ea3a",
+  "versions": {
+    "python": "3.11.4",
+    "sklearn": "1.9.1",
+    "pandas": "2.3.3",
+    "numpy": "2.4.6"
+  }
+}
