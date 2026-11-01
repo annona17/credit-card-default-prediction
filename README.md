@@ -103,6 +103,8 @@ notebooks/         notebook chạy từng bước (EDA → tiền xử lý → t
 reports/           báo cáo, bảng số liệu (tables/) và biểu đồ (figures/)
 ```
 
-Notebook: [`eda_va_tien_xu_ly.ipynb`](notebooks/eda_va_tien_xu_ly.ipynb) (EDA, tiền xử lý, tập đánh giá; tự chứa code, chạy được trên Kaggle), [`mo_hinh_Hiep.ipynb`](notebooks/mo_hinh_Hiep.ipynb) và [`ba_phuong_an_bo_sung.ipynb`](notebooks/ba_phuong_an_bo_sung.ipynb) (mô hình; cần clone repo). Bản dùng trên Kaggle: `kaggle/du_doan_kha_nang_vo_no_the_tin_dung.ipynb`.
+**Notebook đầy đủ:** [`du_doan_vo_no_day_du.ipynb`](notebooks/du_doan_vo_no_day_du.ipynb) gộp cả bài trong một file (EDA → tiền xử lý → tập đánh giá → huấn luyện và đánh giá 5 mô hình), tự chứa code, đã lưu sẵn kết quả chạy; bản tải lên Kaggle: `kaggle/du_doan_vo_no_day_du.ipynb` (thêm `data/splits/split_manifest.csv` làm input để ra đúng phép chia của báo cáo). Chạy lại toàn bộ mất khoảng 10 phút.
+
+Các notebook theo từng phần (giữ lại để đối chiếu): [`eda_va_tien_xu_ly.ipynb`](notebooks/eda_va_tien_xu_ly.ipynb) (EDA, tiền xử lý, tập đánh giá; tự chứa code, chạy được trên Kaggle), [`mo_hinh_Hiep.ipynb`](notebooks/mo_hinh_Hiep.ipynb) và [`ba_phuong_an_bo_sung.ipynb`](notebooks/ba_phuong_an_bo_sung.ipynb) (mô hình; cần clone repo). Bản Kaggle cũ, chỉ có phần EDA: `kaggle/du_doan_kha_nang_vo_no_the_tin_dung.ipynb`.
 
 Báo cáo thành phần của từng phần việc (đã được tổng hợp vào báo cáo cuối kỳ) nằm trong `reports/`: `Bao_cao_Phan1_Bai_toan_va_Du_lieu.docx`, `Bao_cao_Tien_xu_ly.md`, `Bao_cao_Tap_danh_gia.md`, `Bao_cao_Mo_hinh_Hiep.md`, `Bao_cao_So_sanh_Tat_ca_Mo_hinh.md` và ba báo cáo mô hình bổ sung.
