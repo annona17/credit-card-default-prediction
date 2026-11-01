@@ -60,6 +60,21 @@ python -m venv .venv-model
 .venv-model/bin/python -m src.modeling_team
 ```
 
+## Demo tương tác
+
+Web demo (Streamlit) cho phép thao tác trực tiếp với dữ liệu:
+
+- **Dự đoán cho một khách hàng:** lấy ngẫu nhiên một khách hàng trong tập test hoặc tự nhập/sửa thông tin, xem xác suất vỡ nợ, quyết định cảnh báo và các đặc trưng hành vi mô hình tính thêm.
+- **Chọn ngưỡng theo chi phí:** đổi tỷ lệ phạt (bỏ sót / nhắc nhầm) hoặc tự kéo ngưỡng, xem TP/FN/FP, Recall và chi phí trên tập test thay đổi thế nào.
+- **Khám phá dữ liệu:** lọc theo hạn mức, tuổi, giới tính và xem tỷ lệ vỡ nợ theo từng nhóm.
+
+```bash
+.venv/bin/python -m pip install -r requirements-demo.txt
+.venv/bin/python -m streamlit run demo/app.py
+```
+
+Demo tự huấn luyện lại HistGradientBoosting và Logistic Regression theo đúng cấu hình đã chọn trong báo cáo (khoảng 10 giây ở lần mở đầu), nên không cần chạy trước bước 4. Với scikit-learn 1.9.1, ngưỡng và kết quả trên test khớp với báo cáo (ngưỡng 0,167; 778 phát hiện đúng, 243 bỏ sót, 1.219 nhắc nhầm).
+
 ## Dùng mô hình đã huấn luyện
 
 Sau bước 4, mỗi mô hình được lưu cùng ngưỡng quyết định đã chọn trên validation. Đầu vào là 23 cột gốc đã làm sạch; pipeline tự tạo đặc trưng và biến đổi.
@@ -83,6 +98,7 @@ data/raw/          dữ liệu gốc UCI
 data/splits/       phép chia cố định train/validation/test
 src/               mã nguồn: eda, preprocessing, evaluation, modeling, modeling_team
 tests/             kiểm thử tự động
+demo/              web demo tương tác (Streamlit)
 notebooks/         notebook chạy từng bước (EDA → tiền xử lý → tập đánh giá → mô hình)
 reports/           báo cáo, bảng số liệu (tables/) và biểu đồ (figures/)
 ```
